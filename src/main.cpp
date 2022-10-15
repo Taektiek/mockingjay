@@ -27,7 +27,7 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     return (Vector2){t1, t2};
 }
 
-float ComputeLighting(Vector3 P, Vector3 N, Scene scene) {
+float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
     float i = 0.0;
     Vector3 L;
 
@@ -40,9 +40,20 @@ float ComputeLighting(Vector3 P, Vector3 N, Scene scene) {
             } else if (light.type == 2) {
                 L = light.direction;
             }
+
+            // Diffuse
             float n_dot_l = dot(N, L);
             if (n_dot_l > 0) {
                 i += light.intensity * n_dot_l/magnitude(L);
+            }
+
+            // Specular
+            if (s != -1) {
+                Vector3 R = subtract(multiply(N, 2* dot(N, L)), L);
+                float r_dot_v = dot(R, V);
+                if (r_dot_v > 0) {
+                    i += light.intensity * pow(r_dot_v/(magnitude(R)*magnitude(V)), s);
+                }
             }
         }
     }
@@ -79,7 +90,7 @@ Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
     Vector3 P = multiply(D, closest_t);
     Vector3 N = subtract(P, closest_sphere.center);
     N = multiply(N, 1/magnitude(N));
-    return (multiply(closest_sphere.color, ComputeLighting(P, N, scene)));
+    return (multiply(closest_sphere.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.specular, scene)));
 }
 
 int main(void) {
@@ -96,57 +107,31 @@ int main(void) {
     Scene scene(vp);
 
     scene.AddSphere(Sphere(
-        (Vector3){0, 0, 5},
+        (Vector3){0, -1, 3},
         1,
-        BEIGE
+        RED,
+        500
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){1, 1, 5},
-        0.5,
-        DARKGRAY
+        (Vector3){2, 0, 4},
+        1,
+        BLUE,
+        500
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){-1, 1, 5},
-        0.5,
-        DARKGRAY
+        (Vector3){-2, 0, 4},
+        1,
+        GREEN,
+        50
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){0, 0, 4},
-        0.2,
-        DARKGRAY
-    ));
-
-    scene.AddSphere(Sphere(
-        (Vector3){0.35, 0.3, 4.2},
-        0.2,
-        RAYWHITE
-    ));
-
-    scene.AddSphere(Sphere(
-        (Vector3){-0.35, 0.3, 4.2},
-        0.2,
-        RAYWHITE
-    ));
-
-    scene.AddSphere(Sphere(
-        (Vector3){0.35, 0.3, 4},
-        0.05,
-        BLACK
-    ));
-
-    scene.AddSphere(Sphere(
-        (Vector3){-0.35, 0.3, 4},
-        0.05,
-        BLACK
-    ));
-
-    scene.AddSphere(Sphere(
-        (Vector3){0, -0.35, 3},
-        0.15,
-        (Color){50,50,50}
+        (Vector3){0, -5001, 0},
+        5000,
+        YELLOW,
+        1000
     ));
 
     scene.AddLight(Light(

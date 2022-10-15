@@ -7,9 +7,12 @@ class Sphere {
     public:
         Vector3 center;
         float radius;
-        Color color;
 
-        Sphere(Vector3 center, float radius, Color color);
+        //Material
+        Color color;
+        float specular;
+
+        Sphere(Vector3 center, float radius, Color color, float specular);
         Sphere();
 };
 

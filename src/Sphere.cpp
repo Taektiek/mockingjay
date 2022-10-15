@@ -1,10 +1,11 @@
 #include "Sphere.h"
 
-Sphere::Sphere(Vector3 c, float r, Color clr) {
+Sphere::Sphere(Vector3 c, float r, Color clr, float spec) {
     center = c;
     radius = r;
 
     color = clr;
+    specular = spec;
 }
 
 Sphere::Sphere() {
