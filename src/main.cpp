@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <utility>
 
 Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     double r = sphere.radius;
@@ -27,6 +28,29 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     return (Vector2){t1, t2};
 }
 
+std::pair<Sphere, float> ClosestIntersection(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
+    float closest_t = 1E9;
+    Sphere closest_sphere;
+
+    for (Sphere sphere: scene.spheres) {
+        Vector2 t_points = IntersectRaySphere(O, D, sphere);
+        double t1 = t_points.x;
+        double t2 = t_points.y;
+
+        if ((t1 > t_min && t1 < t_max)&&(t1<closest_t)) {
+            closest_t = t1;
+            closest_sphere = sphere;
+        }
+
+        if ((t2 > t_min && t2 < t_max)&&(t2<closest_t)) {
+            closest_t = t2;
+            closest_sphere = sphere;
+        }
+    }
+
+    return std::make_pair(closest_sphere, closest_t);
+}
+
 float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
     float i = 0.0;
     Vector3 L;
@@ -40,6 +64,12 @@ float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
             } else if (light.type == 2) {
                 L = light.direction;
             }
+
+            // Shadow Check
+            float shadow_t = ClosestIntersection(P, L, 0.001, 1E9, scene).second;
+            if (shadow_t != 1E9) {
+                continue;
+            } 
 
             // Diffuse
             float n_dot_l = dot(N, L);
@@ -60,30 +90,12 @@ float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
     return i;
 }
 
-Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
-    bool found_sphere = false;
-    float closest_t = 1E9;
-    Sphere closest_sphere;
+Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {   
+    std::pair<Sphere, float> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
+    Sphere closest_sphere = closest_intersection.first;
+    float closest_t = closest_intersection.second;
 
-    for (Sphere sphere: scene.spheres) {
-        Vector2 t_points = IntersectRaySphere(O, D, sphere);
-        double t1 = t_points.x;
-        double t2 = t_points.y;
-
-        if ((t1 > t_min && t1 < t_max)&&(t1<closest_t)) {
-            closest_t = t1;
-            closest_sphere = sphere;
-            found_sphere = true;
-        }
-
-        if ((t2 > t_min && t2 < t_max)&&(t2<closest_t)) {
-            closest_t = t2;
-            closest_sphere = sphere;
-            found_sphere = true;
-        }
-    }
-    
-    if (!found_sphere) {
+    if (closest_t==1E9) {
         return RAYWHITE;
     }
 
