@@ -86,7 +86,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(500, 500);
+    Canvas canvas(1000, 1000);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
@@ -96,27 +96,57 @@ int main(void) {
     Scene scene(vp);
 
     scene.AddSphere(Sphere(
-        (Vector3){0, -1, 3},
+        (Vector3){0, 0, 5},
         1,
-        (Color){255, 0, 0, 255}
+        BEIGE
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){2, 0, 4},
-        1,
-        (Color){0, 0, 255, 255}
+        (Vector3){1, 1, 5},
+        0.5,
+        DARKGRAY
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){-2, 0, 4},
-        1,
-        (Color){0, 255, 0, 255}
+        (Vector3){-1, 1, 5},
+        0.5,
+        DARKGRAY
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){0, -5001, 0},
-        5000,
-        YELLOW
+        (Vector3){0, 0, 4},
+        0.2,
+        DARKGRAY
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){0.35, 0.3, 4.2},
+        0.2,
+        RAYWHITE
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){-0.35, 0.3, 4.2},
+        0.2,
+        RAYWHITE
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){0.35, 0.3, 4},
+        0.05,
+        BLACK
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){-0.35, 0.3, 4},
+        0.05,
+        BLACK
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){0, -0.35, 3},
+        0.15,
+        (Color){50,50,50}
     ));
 
     scene.AddLight(Light(
