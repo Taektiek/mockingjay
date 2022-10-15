@@ -17,6 +17,14 @@ Vector3 multiply(Vector3 v, double n) {
     return (Vector3){v.x*n,v.y*n,v.z*n};
 }
 
+Color multiply(Color c, double n) {
+    return (Color){std::min(c.r*n, 255.0), std::min(c.g*n, 255.0), std::min(c.b*n, 255.0), c.a};
+}
+
 double magnitude(Vector3 v) {
-    return sqrt(v.x*v.x+v.y*v.y+v.z+v.z);
+    return sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
+}
+
+void printVector(Vector3 v) {
+    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 }

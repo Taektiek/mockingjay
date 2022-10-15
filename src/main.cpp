@@ -27,6 +27,28 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     return (Vector2){t1, t2};
 }
 
+float ComputeLighting(Vector3 P, Vector3 N, Scene scene) {
+    float i = 0.0;
+    Vector3 L;
+
+    for (Light light: scene.lights) {
+        if (light.type == 0) {
+            i += light.intensity;
+        } else {
+            if (light.type == 1) {
+                L = subtract(light.position, P);
+            } else if (light.type == 2) {
+                L = light.direction;
+            }
+            float n_dot_l = dot(N, L);
+            if (n_dot_l > 0) {
+                i += light.intensity * n_dot_l/magnitude(L);
+            }
+        }
+    }
+    return i;
+}
+
 Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
     bool found_sphere = false;
     float closest_t = 1E9;
@@ -36,8 +58,6 @@ Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
         Vector2 t_points = IntersectRaySphere(O, D, sphere);
         double t1 = t_points.x;
         double t2 = t_points.y;
-
-        // std::cout << t1 << " " << t2 << std::endl;
 
         if ((t1 > t_min && t1 < t_max)&&(t1<closest_t)) {
             closest_t = t1;
@@ -55,7 +75,11 @@ Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
     if (!found_sphere) {
         return RAYWHITE;
     }
-    return closest_sphere.color;
+
+    Vector3 P = multiply(D, closest_t);
+    Vector3 N = subtract(P, closest_sphere.center);
+    N = multiply(N, 1/magnitude(N));
+    return (multiply(closest_sphere.color, ComputeLighting(P, N, scene)));
 }
 
 int main(void) {
@@ -72,15 +96,44 @@ int main(void) {
     Scene scene(vp);
 
     scene.AddSphere(Sphere(
-        (Vector3){-1,0,5},
+        (Vector3){0, -1, 3},
         1,
-        RED
+        (Color){255, 0, 0, 255}
     ));
 
     scene.AddSphere(Sphere(
-        (Vector3){0.5,0,3},
+        (Vector3){2, 0, 4},
         1,
-        BLUE
+        (Color){0, 0, 255, 255}
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){-2, 0, 4},
+        1,
+        (Color){0, 255, 0, 255}
+    ));
+
+    scene.AddSphere(Sphere(
+        (Vector3){0, -5001, 0},
+        5000,
+        YELLOW
+    ));
+
+    scene.AddLight(Light(
+        0, // Ambient
+        0.2
+    ));
+
+    scene.AddLight(Light(
+        1, // Point
+        0.6,
+        (Vector3){2, 1, 0}
+    ));
+
+    scene.AddLight(Light(
+        2, // Directional
+        0.2,
+        (Vector3){1, 4, 4}
     ));
     
     while (!WindowShouldClose()) {
@@ -96,10 +149,6 @@ int main(void) {
                 canvas.PutPixel(x, y, color);
             }
         }
-
-        scene.spheres[1].center.z += 0.05;
-        scene.spheres[0].center.x += 0.02;
-        scene.spheres[0].radius -= 0.005;
 
         EndDrawing();
     }
