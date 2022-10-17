@@ -28,8 +28,8 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     return (Vector2){t1, t2};
 }
 
-std::pair<Sphere, float> ClosestIntersection(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {
-    float closest_t = 1E9;
+std::pair<Sphere, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
+    double closest_t = 1E9;
     Sphere closest_sphere;
 
     for (Sphere sphere: scene.spheres) {
@@ -51,8 +51,8 @@ std::pair<Sphere, float> ClosestIntersection(Vector3 O, Vector3 D, float t_min, 
     return std::make_pair(closest_sphere, closest_t);
 }
 
-float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
-    float i = 0.0;
+double ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
+    double i = 0.0;
     Vector3 L;
 
     for (Light light: scene.lights) {
@@ -66,13 +66,13 @@ float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
             }
 
             // Shadow Check
-            float shadow_t = ClosestIntersection(P, L, 0.001, 1E9, scene).second;
+            double shadow_t = ClosestIntersection(P, L, 0.001, 1E9, scene).second;
             if (shadow_t != 1E9) {
                 continue;
             } 
 
             // Diffuse
-            float n_dot_l = dot(N, L);
+            double n_dot_l = dot(N, L);
             if (n_dot_l > 0) {
                 i += light.intensity * n_dot_l/magnitude(L);
             }
@@ -80,7 +80,7 @@ float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
             // Specular
             if (s != -1) {
                 Vector3 R = subtract(multiply(N, 2* dot(N, L)), L);
-                float r_dot_v = dot(R, V);
+                double r_dot_v = dot(R, V);
                 if (r_dot_v > 0) {
                     i += light.intensity * pow(r_dot_v/(magnitude(R)*magnitude(V)), s);
                 }
@@ -90,19 +90,34 @@ float ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
     return i;
 }
 
-Color TraceRay(Vector3 O, Vector3 D, float t_min, float t_max, Scene scene) {   
-    std::pair<Sphere, float> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
+Vector3 ReflectRay(Vector3 R, Vector3 N) {
+    return subtract(multiply(N, 2 * dot(N, R)), R);
+}
+
+Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, int recursion_depth) {   
+    std::pair<Sphere, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
     Sphere closest_sphere = closest_intersection.first;
-    float closest_t = closest_intersection.second;
+    double closest_t = closest_intersection.second;
 
     if (closest_t==1E9) {
         return RAYWHITE;
     }
 
-    Vector3 P = multiply(D, closest_t);
+    Vector3 P = add(O, multiply(D, closest_t));
     Vector3 N = subtract(P, closest_sphere.center);
     N = multiply(N, 1/magnitude(N));
-    return (multiply(closest_sphere.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.specular, scene)));
+    Color local_color = multiply(closest_sphere.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.specular, scene));
+
+    double r = closest_sphere.reflective;
+    if (recursion_depth <=0 || r <= 0) {
+        return local_color;
+    }
+
+    Vector3 R = ReflectRay(multiply(D, -1), N);
+    Color reflected_color = TraceRay(P, R, 0.001, 1E9, scene, recursion_depth - 1);
+
+    return add(multiply(local_color, 1 - r), multiply(reflected_color, r)); 
+
 }
 
 int main(void) {
@@ -121,29 +136,33 @@ int main(void) {
     scene.AddSphere(Sphere(
         (Vector3){0, -1, 3},
         1,
-        RED,
-        500
+        (Color){255, 0, 0, 255},
+        500,
+        0.2
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){2, 0, 4},
         1,
-        BLUE,
-        500
+        (Color){0, 0, 255, 255},
+        500,
+        0.3
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){-2, 0, 4},
         1,
-        GREEN,
-        50
+        (Color){0, 255, 0, 255},
+        10,
+        0.4
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){0, -5001, 0},
         5000,
-        YELLOW,
-        1000
+        (Color){255, 255, 0, 255},
+        1000,
+        0
     ));
 
     scene.AddLight(Light(
@@ -172,7 +191,7 @@ int main(void) {
         for (int x = -canvas.width/2; x < canvas.width/2; x++) {
             for (int y = -canvas.height/2; y < canvas.height/2; y++) {
                 Vector3 D = vp.CanvasToViewport(canvas, x, y);
-                Color color = TraceRay(O, D, 1, 1E9, scene);
+                Color color = TraceRay(O, D, 1, 1E9, scene, 3);
                 canvas.PutPixel(x, y, color);
             }
         }

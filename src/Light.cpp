@@ -7,14 +7,14 @@ Light::Light() {
     direction = (Vector3){0, 0, 0};
 }
 
-Light::Light(int t, float i) {
+Light::Light(int t, double i) {
     type = t;
     intensity = i;
     position = (Vector3){0, 0, 0};
     direction = (Vector3){0, 0, 0};
 }
 
-Light::Light(int t, float i, Vector3 pos_or_rot) {
+Light::Light(int t, double i, Vector3 pos_or_rot) {
     type = t;
     intensity = i;
     if (type == 1) {

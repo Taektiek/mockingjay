@@ -6,12 +6,12 @@
 
 class Viewport {
     public:
-        float width;
-        float height;
+        double width;
+        double height;
 
-        float projection_plane_distance;
+        double projection_plane_distance;
 
-        Viewport(float w, float h, float ppd);
+        Viewport(double w, double h, double ppd);
         Viewport();
 
         Vector3 CanvasToViewport(Canvas canvas, int x, int y);

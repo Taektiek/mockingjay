@@ -1,6 +1,6 @@
 #include "Viewport.h"
 
-Viewport::Viewport(float w, float h, float ppd) {
+Viewport::Viewport(double w, double h, double ppd) {
     width = w;
     height = h;
 

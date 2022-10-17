@@ -6,13 +6,14 @@
 class Sphere {
     public:
         Vector3 center;
-        float radius;
+        double radius;
 
         //Material
         Color color;
-        float specular;
+        double specular;
+        double reflective;
 
-        Sphere(Vector3 center, float radius, Color color, float specular);
+        Sphere(Vector3 center, double radius, Color color, double specular, double reflective);
         Sphere();
 };
 
