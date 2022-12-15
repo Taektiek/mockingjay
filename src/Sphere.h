@@ -2,18 +2,16 @@
 #define SPHERE_H
 
 #include "raylib.h"
+#include "ObjectMaterial.h"
 
 class Sphere {
     public:
         Vector3 center;
         double radius;
 
-        //Material
-        Color color;
-        double specular;
-        double reflective;
+        ObjectMaterial material;
 
-        Sphere(Vector3 center, double radius, Color color, double specular, double reflective);
+        Sphere(Vector3 center, double radius, ObjectMaterial material);
         Sphere();
 };
 

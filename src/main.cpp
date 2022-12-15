@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "Sphere.h"
 #include "VectorMath.h"
+#include "ObjectMaterial.h"
 
 #include <math.h>
 #include <iostream>
@@ -27,6 +28,10 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
 
     return (Vector2){t1, t2};
 }
+
+// double IntersectRaySDF(Vector3 O, Vector3 D, SDFObject object) {
+//     return 0;
+// }
 
 std::pair<Sphere, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
@@ -106,9 +111,9 @@ Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, in
     Vector3 P = add(O, multiply(D, closest_t));
     Vector3 N = subtract(P, closest_sphere.center);
     N = multiply(N, 1/magnitude(N));
-    Color local_color = multiply(closest_sphere.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.specular, scene));
+    Color local_color = multiply(closest_sphere.material.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.material.specular, scene));
 
-    double r = closest_sphere.reflective;
+    double r = closest_sphere.material.reflective;
     if (recursion_depth <=0 || r <= 0) {
         return local_color;
     }
@@ -136,33 +141,41 @@ int main(void) {
     scene.AddSphere(Sphere(
         (Vector3){0, -1, 3},
         1,
-        (Color){255, 0, 0, 255},
-        500,
-        0.2
+        ObjectMaterial (
+            (Color){255, 0, 0, 255},
+            500,
+            0.2
+        )
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){2, 0, 4},
         1,
-        (Color){0, 0, 255, 255},
-        500,
-        0.3
+        ObjectMaterial (
+            (Color){0, 0, 255, 255},
+            500,
+            0.2
+        )
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){-2, 0, 4},
         1,
-        (Color){0, 255, 0, 255},
-        10,
-        0.4
+        ObjectMaterial (
+            (Color){0, 255, 0, 255},
+            500,
+            0.2
+        )
     ));
 
     scene.AddSphere(Sphere(
         (Vector3){0, -5001, 0},
         5000,
-        (Color){255, 255, 0, 255},
-        1000,
-        0
+        ObjectMaterial (
+            (Color){255, 255, 0, 255},
+            500,
+            0
+        )
     ));
 
     scene.AddLight(Light(
