@@ -1,1 +1,1 @@
-g++ src/*.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o raytracer
+g++ src/*.cpp src/objects/*cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -o raytracer -Wno-narrowing

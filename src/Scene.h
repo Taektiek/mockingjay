@@ -4,19 +4,19 @@
 #include <vector>
 
 #include "Viewport.h"
-#include "Sphere.h"
+#include "SDFObject.h"
 #include "Light.h"
 
 class Scene {
     public:
         Viewport vp;
 
-        std::vector<Sphere> spheres;
+        std::vector<SDFObject*> objects;
         std::vector<Light> lights;
 
         Scene(Viewport viewport);
 
-        void AddSphere(Sphere sphere);
+        void AddObject(SDFObject *object);
         void AddLight(Light light);
 };
 

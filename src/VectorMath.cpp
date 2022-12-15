@@ -29,6 +29,14 @@ double magnitude(Vector3 v) {
     return sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
 }
 
+double magnitude(Vector2 v) {
+    return sqrt(v.x*v.x+v.y*v.y);
+}
+
+Vector3 normalize(Vector3 v) {
+    return multiply(v, pow(magnitude(v),-1));
+}
+
 void printVector(Vector3 v) {
     std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 }

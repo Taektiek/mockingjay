@@ -2,12 +2,37 @@
 #include "Canvas.h"
 #include "Scene.h"
 #include "Sphere.h"
+#include "SDFObject.h"
+#include "objects/SDFSphere.h"
+#include "objects/SDFTorus.h"
 #include "VectorMath.h"
 #include "ObjectMaterial.h"
 
 #include <math.h>
 #include <iostream>
 #include <utility>
+
+double EPSILON = 0.0001;
+
+double marchRay(Vector3 O, Vector3 D, SDFObject *object, double max_distance, int max_marching_steps, double max_depth) {
+    double depth = magnitude(D);
+
+    for (int i = 0; i < max_marching_steps; i++) {
+        double distance = object->SDF(add(O, multiply(D, depth)));
+        if (distance < max_distance) {
+            return depth;
+        }
+
+        depth += distance;
+
+
+        if (depth >= max_depth) {
+            return 1E9;
+        }
+    }
+
+    return 1E9;
+}
 
 Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     double r = sphere.radius;
@@ -29,31 +54,20 @@ Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
     return (Vector2){t1, t2};
 }
 
-// double IntersectRaySDF(Vector3 O, Vector3 D, SDFObject object) {
-//     return 0;
-// }
-
-std::pair<Sphere, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
+std::pair<SDFObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
-    Sphere closest_sphere;
+    SDFObject *closest_object;
 
-    for (Sphere sphere: scene.spheres) {
-        Vector2 t_points = IntersectRaySphere(O, D, sphere);
-        double t1 = t_points.x;
-        double t2 = t_points.y;
+    for (SDFObject *object: scene.objects) {
+        double t = marchRay(O, D, object, 0.001, 1000, 1000);
 
-        if ((t1 > t_min && t1 < t_max)&&(t1<closest_t)) {
-            closest_t = t1;
-            closest_sphere = sphere;
-        }
-
-        if ((t2 > t_min && t2 < t_max)&&(t2<closest_t)) {
-            closest_t = t2;
-            closest_sphere = sphere;
+        if ((t > t_min && t < t_max)&&(t<closest_t)) {
+            closest_t = t;
+            closest_object = object;
         }
     }
 
-    return std::make_pair(closest_sphere, closest_t);
+    return std::make_pair(closest_object, closest_t);
 }
 
 double ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
@@ -99,9 +113,17 @@ Vector3 ReflectRay(Vector3 R, Vector3 N) {
     return subtract(multiply(N, 2 * dot(N, R)), R);
 }
 
+Vector3 estimateNormal(SDFObject *object, Vector3 P) {
+    return normalize((Vector3){
+        object->SDF((Vector3){P.x + EPSILON, P.y, P.z}) - object->SDF((Vector3){P.x - EPSILON, P.y, P.z}),
+        object->SDF((Vector3){P.x, P.y + EPSILON, P.z}) - object->SDF((Vector3){P.x, P.y - EPSILON, P.z}),
+        object->SDF((Vector3){P.x, P.y, P.z  + EPSILON}) - object->SDF((Vector3){P.x, P.y, P.z - EPSILON})
+    });
+}
+
 Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, int recursion_depth) {   
-    std::pair<Sphere, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
-    Sphere closest_sphere = closest_intersection.first;
+    std::pair<SDFObject*, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
+    SDFObject *closest_object = closest_intersection.first;
     double closest_t = closest_intersection.second;
 
     if (closest_t==1E9) {
@@ -109,11 +131,10 @@ Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, in
     }
 
     Vector3 P = add(O, multiply(D, closest_t));
-    Vector3 N = subtract(P, closest_sphere.center);
-    N = multiply(N, 1/magnitude(N));
-    Color local_color = multiply(closest_sphere.material.color, ComputeLighting(P, N, multiply(D, -1), closest_sphere.material.specular, scene));
+    Vector3 N = estimateNormal(closest_object, P);
+    Color local_color = multiply(closest_object->material.color, ComputeLighting(P, N, multiply(D, -1), closest_object->material.specular, scene));
 
-    double r = closest_sphere.material.reflective;
+    double r = closest_object->material.reflective;
     if (recursion_depth <=0 || r <= 0) {
         return local_color;
     }
@@ -121,7 +142,7 @@ Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, in
     Vector3 R = ReflectRay(multiply(D, -1), N);
     Color reflected_color = TraceRay(P, R, 0.001, 1E9, scene, recursion_depth - 1);
 
-    return add(multiply(local_color, 1 - r), multiply(reflected_color, r)); 
+    return add(multiply(local_color, 1 - r), multiply(reflected_color, r));
 
 }
 
@@ -138,43 +159,43 @@ int main(void) {
 
     Scene scene(vp);
 
-    scene.AddSphere(Sphere(
-        (Vector3){0, -1, 3},
-        1,
+    scene.AddObject(new SDFSphere(
+        (Vector3){0, 0, 10}, // center
+        1, // radius
         ObjectMaterial (
-            (Color){255, 0, 0, 255},
-            500,
-            0.2
+            (Color){0, 255, 0, 255}, // color
+            500, // specular
+            0.2 // reflective
         )
     ));
 
-    scene.AddSphere(Sphere(
-        (Vector3){2, 0, 4},
-        1,
+    scene.AddObject(new SDFTorus(
+        (Vector3){0, -3, 10}, // center
+        (Vector2){2, .5}, // holes
         ObjectMaterial (
-            (Color){0, 0, 255, 255},
-            500,
-            0.2
+            (Color){255, 0, 0, 255}, // color
+            500, // specular
+            0.2 // reflective
         )
     ));
 
-    scene.AddSphere(Sphere(
-        (Vector3){-2, 0, 4},
-        1,
-        ObjectMaterial (
-            (Color){0, 255, 0, 255},
-            500,
-            0.2
-        )
-    ));
+    // scene.AddObject(new SDFTorus(
+    //     (Vector3){0, 0, 10}, // center
+    //     (Vector2){5, .2}, // holes
+    //     ObjectMaterial (
+    //         (Color){0, 0, 255, 255}, // color
+    //         300, // specular
+    //         0.2 // reflective
+    //     )
+    // ));
 
-    scene.AddSphere(Sphere(
-        (Vector3){0, -5001, 0},
-        5000,
+    scene.AddObject(new SDFTorus(
+        (Vector3){0, 3, 10}, // center
+        (Vector2){2, .5}, // holes
         ObjectMaterial (
-            (Color){255, 255, 0, 255},
-            500,
-            0
+            (Color){255, 255, 0, 255}, // color
+            500, // specular
+            0.2 // reflective
         )
     ));
 

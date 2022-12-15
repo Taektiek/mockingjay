@@ -4,8 +4,8 @@ Scene::Scene(Viewport viewport) {
     vp = viewport;
 }
 
-void Scene::AddSphere(Sphere sphere) {
-    spheres.push_back(sphere);
+void Scene::AddObject(SDFObject *object) {
+    objects.push_back(object);
 }
 
 void Scene::AddLight(Light light) {
