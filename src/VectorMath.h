@@ -16,6 +16,7 @@ double magnitude(Vector2 v);
 Vector3 normalize(Vector3 v);
 Vector3 abs(Vector3 v);
 Vector3 max(Vector3 v, double n);
+Vector2 max(Vector2 v, double n);
 Vector3 mod(Vector3 v, double n);
 
 void printVector(Vector3 v);

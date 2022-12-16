@@ -45,6 +45,10 @@ Vector3 max(Vector3 v, double n) {
     return (Vector3){std::max((double)v.x, n), std::max((double)v.y, n), std::max((double)v.z, n)};
 }
 
+Vector2 max(Vector2 v, double n) {
+    return (Vector2){std::max((double)v.x, n), std::max((double)v.y, n)};
+}
+
 Vector3 mod(Vector3 v, double n) {
     return (Vector3){std::fmod(v.x, n), std::fmod(v.y, n), std::fmod(v.z, n)};
 }

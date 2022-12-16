@@ -5,6 +5,8 @@
 #include "objects/SDFSphere.h"
 #include "objects/SDFTorus.h"
 #include "objects/SDFBox.h"
+#include "objects/SDFPlane.h"
+#include "objects/SDFCylinder.h"
 
 void initScene(Scene *scene);
 

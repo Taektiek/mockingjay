@@ -2,23 +2,36 @@
 
 void initScene(Scene *scene) {
 
-    scene -> AddObject(new SDFSphere(
-        (Vector3){0, 0, 10}, // center
-        2, //radius
+    scene -> AddObject(new SDFCylinder(
+        (Vector3){0, 3, 10}, // center
+        1, // height
+        0.5, // radius
         ObjectMaterial (
-            (Color){153,181,210, 255}, // color
+            (Color){255, 0, 0, 255}, // color
             500, // specular
-            0.1 // reflective
+            0.2 // reflective
         )
     ));
 
-    scene -> AddObject(new SDFTorus(
-        (Vector3){0, -3, 10}, // center
-        (Vector2){2, 0.5}, // radii
+    scene -> AddObject(new SDFCylinder(
+        (Vector3){0, 0, 10}, // center
+        1.5, // height
+        1, // radius
         ObjectMaterial (
             (Color){0, 255, 0, 255}, // color
             500, // specular
-            0.1 // reflective
+            0.2 // reflective
+        )
+    ));
+
+    scene -> AddObject(new SDFCylinder(
+        (Vector3){0, -3, 10}, // center
+        1, // height
+        2, // radius
+        ObjectMaterial (
+            (Color){0, 0, 255, 255}, // color
+            500, // specular
+            0.2 // reflective
         )
     ));
 
