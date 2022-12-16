@@ -37,6 +37,14 @@ Vector3 normalize(Vector3 v) {
     return multiply(v, pow(magnitude(v),-1));
 }
 
+Vector3 abs(Vector3 v) {
+    return (Vector3){abs(v.x),abs(v.y),abs(v.z)};
+}
+
+Vector3 max(Vector3 v, double n) {
+    return (Vector3){std::max((double)v.x, n), std::max((double)v.y, n), std::max((double)v.z, n)};
+}
+
 void printVector(Vector3 v) {
     std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 }

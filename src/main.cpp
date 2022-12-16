@@ -5,6 +5,7 @@
 #include "SDFObject.h"
 #include "objects/SDFSphere.h"
 #include "objects/SDFTorus.h"
+#include "objects/SDFBox.h"
 #include "VectorMath.h"
 #include "ObjectMaterial.h"
 
@@ -150,7 +151,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(1000, 1000);
+    Canvas canvas(500, 500);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
@@ -159,9 +160,9 @@ int main(void) {
 
     Scene scene(vp);
 
-    scene.AddObject(new SDFSphere(
-        (Vector3){0, 0, 10}, // center
-        1, // radius
+    scene.AddObject(new SDFBox(
+        (Vector3){0, -3, 10}, // center
+        (Vector3){5, 1, 1}, // box
         ObjectMaterial (
             (Color){0, 255, 0, 255}, // color
             500, // specular
@@ -170,32 +171,22 @@ int main(void) {
     ));
 
     scene.AddObject(new SDFTorus(
-        (Vector3){0, -3, 10}, // center
-        (Vector2){2, .5}, // holes
+        (Vector3){0, 0, 10}, // center
+        (Vector2){2, 1}, //radii
         ObjectMaterial (
-            (Color){255, 0, 0, 255}, // color
-            500, // specular
-            0.2 // reflective
+            (Color){0, 255, 255, 255}, // color
+            50, // specular
+            0.1 // reflective
         )
     ));
 
-    // scene.AddObject(new SDFTorus(
-    //     (Vector3){0, 0, 10}, // center
-    //     (Vector2){5, .2}, // holes
-    //     ObjectMaterial (
-    //         (Color){0, 0, 255, 255}, // color
-    //         300, // specular
-    //         0.2 // reflective
-    //     )
-    // ));
-
-    scene.AddObject(new SDFTorus(
+    scene.AddObject(new SDFSphere(
         (Vector3){0, 3, 10}, // center
-        (Vector2){2, .5}, // holes
+        2, //radius
         ObjectMaterial (
-            (Color){255, 255, 0, 255}, // color
+            (Color){255, 0, 0, 255}, // color
             500, // specular
-            0.2 // reflective
+            0.5 // reflective
         )
     ));
 

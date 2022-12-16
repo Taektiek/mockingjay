@@ -14,6 +14,8 @@ Color multiply(Color c, double n);
 double magnitude(Vector3 v);
 double magnitude(Vector2 v);
 Vector3 normalize(Vector3 v);
+Vector3 abs(Vector3 v);
+Vector3 max(Vector3 v, double n);
 
 void printVector(Vector3 v);
 void printColor(Color c);
