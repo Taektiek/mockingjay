@@ -17,5 +17,5 @@ SDFSubtraction::SDFSubtraction() {
 
 double SDFSubtraction::SDF(Vector3 P) {
     P = subtract(P, center);
-    return std::max(-1 * first_object -> SDF(P), second_object -> SDF(P));
+    return std::max(first_object -> SDF(P), -1 * second_object -> SDF(P));
 }
