@@ -45,6 +45,10 @@ Vector3 max(Vector3 v, double n) {
     return (Vector3){std::max((double)v.x, n), std::max((double)v.y, n), std::max((double)v.z, n)};
 }
 
+Vector3 mod(Vector3 v, double n) {
+    return (Vector3){std::fmod(v.x, n), std::fmod(v.y, n), std::fmod(v.z, n)};
+}
+
 void printVector(Vector3 v) {
     std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 }

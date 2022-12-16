@@ -4,6 +4,7 @@
 #include "../SDFObject.h"
 #include "../ObjectMaterial.h"
 #include "../VectorMath.h"
+#include<math.h>
 
 class SDFSphere: public SDFObject {
     public:

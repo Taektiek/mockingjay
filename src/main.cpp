@@ -1,19 +1,16 @@
 #include "raylib.h"
 #include "Canvas.h"
 #include "Scene.h"
-#include "Sphere.h"
 #include "SDFObject.h"
-#include "objects/SDFSphere.h"
-#include "objects/SDFTorus.h"
-#include "objects/SDFBox.h"
 #include "VectorMath.h"
 #include "ObjectMaterial.h"
+#include "sceneContent.h"
 
 #include <math.h>
 #include <iostream>
 #include <utility>
 
-double EPSILON = 0.0001;
+double EPSILON = 0.00001;
 
 double marchRay(Vector3 O, Vector3 D, SDFObject *object, double max_distance, int max_marching_steps, double max_depth) {
     double depth = magnitude(D);
@@ -35,32 +32,12 @@ double marchRay(Vector3 O, Vector3 D, SDFObject *object, double max_distance, in
     return 1E9;
 }
 
-Vector2 IntersectRaySphere(Vector3 O, Vector3 D, Sphere sphere) {
-    double r = sphere.radius;
-    Vector3 CO = subtract(O, sphere.center);
-
-    double a = dot(D, D);
-    double b = 2 * dot(CO, D);
-    double c = dot(CO, CO) - r*r;
-
-    double discriminant = b*b-4*a*c;
-
-    if (discriminant < 0) {
-        return (Vector2){1E9, 1E9};
-    }
-
-    double t1 = (-b + sqrt(discriminant))/(2*a);
-    double t2 = (-b - sqrt(discriminant))/(2*a);
-
-    return (Vector2){t1, t2};
-}
-
 std::pair<SDFObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
     SDFObject *closest_object;
 
     for (SDFObject *object: scene.objects) {
-        double t = marchRay(O, D, object, 0.001, 1000, 1000);
+        double t = marchRay(O, D, object, 0.001, 100000, 1000);
 
         if ((t > t_min && t < t_max)&&(t<closest_t)) {
             closest_t = t;
@@ -160,52 +137,7 @@ int main(void) {
 
     Scene scene(vp);
 
-    scene.AddObject(new SDFBox(
-        (Vector3){0, -3, 10}, // center
-        (Vector3){5, 1, 1}, // box
-        ObjectMaterial (
-            (Color){0, 255, 0, 255}, // color
-            500, // specular
-            0.2 // reflective
-        )
-    ));
-
-    scene.AddObject(new SDFTorus(
-        (Vector3){0, 0, 10}, // center
-        (Vector2){2, 1}, //radii
-        ObjectMaterial (
-            (Color){0, 255, 255, 255}, // color
-            50, // specular
-            0.1 // reflective
-        )
-    ));
-
-    scene.AddObject(new SDFSphere(
-        (Vector3){0, 3, 10}, // center
-        2, //radius
-        ObjectMaterial (
-            (Color){255, 0, 0, 255}, // color
-            500, // specular
-            0.5 // reflective
-        )
-    ));
-
-    scene.AddLight(Light(
-        0, // Ambient
-        0.2
-    ));
-
-    scene.AddLight(Light(
-        1, // Point
-        0.6,
-        (Vector3){2, 1, 0}
-    ));
-
-    scene.AddLight(Light(
-        2, // Directional
-        0.2,
-        (Vector3){1, 4, 4}
-    ));
+    initScene(&scene);
     
     while (!WindowShouldClose()) {
         BeginDrawing();
