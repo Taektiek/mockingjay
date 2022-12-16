@@ -63,7 +63,7 @@ double ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
             }
 
             // Shadow Check
-            double shadow_t = ClosestIntersection(P, L, 0.001, 1E9, scene).second;
+            double shadow_t = ClosestIntersection(P, multiply(normalize(L), 0.1), 0.001, 1E9, scene).second;
             if (shadow_t != 1E9) {
                 continue;
             } 
@@ -128,7 +128,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(500, 500);
+    Canvas canvas(1000, 1000);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
@@ -147,7 +147,7 @@ int main(void) {
 
         for (int x = -canvas.width/2; x < canvas.width/2; x++) {
             for (int y = -canvas.height/2; y < canvas.height/2; y++) {
-                Vector3 D = vp.CanvasToViewport(canvas, x, y);
+                Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
                 Color color = TraceRay(O, D, 1, 1E9, scene, 3);
                 canvas.PutPixel(x, y, color);
             }
