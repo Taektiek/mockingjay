@@ -7,6 +7,7 @@
 
 class SDFBox: public SDFObject {
     public:
+        Vector3 center;
         Vector3 box;
 
         SDFBox(Vector3 center, Vector3 box, ObjectMaterial material);

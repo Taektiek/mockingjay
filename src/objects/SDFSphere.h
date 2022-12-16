@@ -8,6 +8,7 @@
 
 class SDFSphere: public SDFObject {
     public:
+        Vector3 center;
         double radius;
 
         SDFSphere(Vector3 center, double radius, ObjectMaterial material);

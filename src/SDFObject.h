@@ -6,11 +6,9 @@
 
 class SDFObject {
     public:
-        Vector3 center;
-
         ObjectMaterial material;
 
-        SDFObject(Vector3 center, ObjectMaterial material);
+        SDFObject(ObjectMaterial material);
         SDFObject();
 
         virtual double SDF(Vector3 P);

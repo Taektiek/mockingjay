@@ -8,6 +8,7 @@
 
 class SDFCylinder: public SDFObject {
     public:
+        Vector3 center;
         double height;
         double radius;
 

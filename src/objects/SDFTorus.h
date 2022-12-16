@@ -7,6 +7,7 @@
 
 class SDFTorus: public SDFObject {
     public:
+        Vector3 center;
         Vector2 holes;
 
         SDFTorus(Vector3 center, Vector2 t, ObjectMaterial material);

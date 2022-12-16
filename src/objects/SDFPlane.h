@@ -8,6 +8,7 @@
 
 class SDFPlane: public SDFObject {
     public:
+        Vector3 center;
         SDFPlane(Vector3 center, ObjectMaterial material);
         SDFPlane();
 

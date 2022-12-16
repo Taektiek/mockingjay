@@ -8,6 +8,10 @@
 #include "objects/SDFPlane.h"
 #include "objects/SDFCylinder.h"
 
+#include "objects/SDFUnion.h"
+#include "objects/SDFSubtraction.h"
+#include "objects/SDFIntersection.h"
+
 void initScene(Scene *scene);
 
 #endif
