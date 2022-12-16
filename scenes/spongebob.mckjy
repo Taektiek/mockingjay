@@ -1,0 +1,83 @@
+ObjectMaterial eyeWhite (
+    {255, 255, 255, 255}, // color
+    500, // specular
+    0.2 // reflective
+);
+
+ObjectMaterial iris (
+    {0, 0, 255, 255}, // color
+    500, // specular
+    0.2 // reflective
+);
+
+ObjectMaterial pupil (
+    {0, 0, 0, 255}, // color
+    500, // specular
+    0.4 // reflective
+);
+
+ObjectMaterial spongeYellow (
+    {255, 255, 0}, // color
+    -1, // specular
+    0.1 //reflective
+);
+
+scene -> AddObject(new SDFSubtraction(
+    {-2, 1, 10}, // center
+    new SDFSphere(
+        {0, 0, 2.5}, // center
+        2, // radius
+        ObjectMaterial()
+    ),
+    new SDFSphere(
+        {0, 0, 0}, // center
+        1, // radius
+        ObjectMaterial()
+    ), 
+    eyeWhite
+));
+
+scene -> AddObject(new SDFSphere(
+    {-2, 1, 11.25}, // center
+    0.8, // radius
+    iris
+));
+
+scene -> AddObject(new SDFSphere(
+    {-2, 1, 10.7}, // center
+    0.3, // radius
+    pupil
+));
+
+scene -> AddObject(new SDFSubtraction(
+    {2, 1, 10}, // center
+    new SDFSphere(
+        {0, 0, 2.5}, // center
+        2, // radius
+        ObjectMaterial()
+    ),
+    new SDFSphere(
+        {0, 0, 0}, // center
+        1, // radius
+        ObjectMaterial()
+    ), 
+    eyeWhite
+));
+
+scene -> AddObject(new SDFSphere(
+    {2, 1, 11.25}, // center
+    0.8, // radius
+    iris
+));
+
+scene -> AddObject(new SDFSphere(
+    {2, 1, 10.7}, // center
+    0.3, // radius
+    pupil
+));
+
+scene -> AddObject(new SDFBox(
+    {0, 0, 12.5}, // center
+    {5, 5, 1}, // box
+    spongeYellow
+));
