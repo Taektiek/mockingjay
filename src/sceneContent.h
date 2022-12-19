@@ -12,6 +12,8 @@
 #include "objects/SDFSubtraction.h"
 #include "objects/SDFIntersection.h"
 
+#include "objects/SDFRotate.h"
+
 void initScene(Scene *scene);
 
 #endif

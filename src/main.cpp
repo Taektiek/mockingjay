@@ -137,7 +137,11 @@ int main(void) {
 
     Scene scene(vp);
 
+    std::cout << "Initialize scene" << std::endl;
+
     initScene(&scene);
+
+    std::cout << "Initialized scene" << std::endl;
     
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -146,6 +150,9 @@ int main(void) {
         DrawText("raytracing!", 10, 10, 20, DARKGRAY);
 
         for (int x = -canvas.width/2; x < canvas.width/2; x++) {
+            if (x % 5 == 0) {
+                std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
+            }
             for (int y = -canvas.height/2; y < canvas.height/2; y++) {
                 Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
                 Color color = TraceRay(O, D, 1, 1E9, scene, 3);

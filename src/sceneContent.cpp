@@ -2,41 +2,55 @@
 
 void initScene(Scene *scene) {
 
-    scene -> AddObject(new SDFSubtraction(
+    scene -> AddObject(new SDFIntersection(
         {0, 0, 10},
-        new SDFIntersection(
-            {0, 0, 0},
-            new SDFSphere(
-                {0,0,0},
-                1,
+        new SDFRotate(
+            (Vector3){0, 0, 0}, // center
+            new SDFTorus(
+                (Vector3){0, 0, 0}, // center
+                {1, 0.5}, // radii
                 ObjectMaterial()
             ),
-            new SDFSphere(
-                {0.5,0,-.3},
-                1,
-                ObjectMaterial()
-            ),
+            45, // x rot
+            0, // y rot
+            30, // z rot
             ObjectMaterial()
         ),
-        new SDFSphere(
-            {0.5, 0.3, -0.1},
-            0.7,
+        new SDFRotate(      
+            (Vector3){0, 0, 0}, // center
+            new SDFBox(
+                (Vector3){0, 0, 0}, // center
+                {1, 1, 1}, // box
+                ObjectMaterial()
+            ),
+            -45, // x rot
+            90, // y rot
+            30, // z rot
             ObjectMaterial()
         ),
         ObjectMaterial(
             {255, 0, 0, 255},
-            100,
+            500,
             0.2
         )
+
     ));
 
-    scene -> AddObject(new SDFTorus(
-        {0, 0, 10},
-        {2,0.2},
-        ObjectMaterial(
-            {255, 255, 0, 255},
-            100,
-            0.2
+    scene -> AddObject(new SDFRotate(
+        (Vector3){3, 0, 10}, // center
+        new SDFCylinder(
+            (Vector3){0, 0, 0}, // center
+            1,
+            0.3,
+            ObjectMaterial()
+        ),
+        -45, // x rot
+        90, // y rot
+        120, // z rot
+        ObjectMaterial (
+            (Color){0, 0, 255, 255}, // color
+            500, // specular
+            0.2 // reflective
         )
     ));
 
@@ -48,12 +62,12 @@ void initScene(Scene *scene) {
     scene -> AddLight(Light(
         1, // Point
         0.6,
-        {2, 1, 0}
+        (Vector3){2, 1, 0}
     ));
 
     scene -> AddLight(Light(
         2, // Directional
         0.2,
-        {0, 4, 4}
+        (Vector3){1, 4, 4}
     ));
 }
