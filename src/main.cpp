@@ -2,6 +2,7 @@
 #include "Canvas.h"
 #include "Scene.h"
 #include "SDFObject.h"
+#include "MeshObject.h"
 #include "VectorMath.h"
 #include "ObjectMaterial.h"
 #include "sceneContent.h"
@@ -10,40 +11,30 @@
 #include <iostream>
 #include <utility>
 
-double EPSILON = 0.00001;
-
-double marchRay(Vector3 O, Vector3 D, SDFObject *object, double max_distance, int max_marching_steps, double max_depth) {
-    double depth = magnitude(D);
-
-    for (int i = 0; i < max_marching_steps; i++) {
-        double distance = object->SDF(add(O, multiply(D, depth)));
-        if (distance < max_distance) {
-            return depth;
-        }
-
-        depth += distance;
 
 
-        if (depth >= max_depth) {
-            return 1E9;
-        }
-    }
-
-    return 1E9;
+double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, double max_distance) {
+    Vector3 n = mesh -> normal;
+    double d = n.x* mesh -> p1.x+n.y* mesh -> p1.y+n.z* mesh -> p1.z;
+    return (d-n.x*O.x-n.y*O.y-n.z*O.z)/(D.x+D.y+D.z);
 }
 
-std::pair<SDFObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
+std::pair<MeshObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
-    SDFObject *closest_object;
+    MeshObject *closest_object;
 
-    for (SDFObject *object: scene.objects) {
-        double t = marchRay(O, D, object, 0.001, 100000, 1000);
+    closest_object = new MeshObject(
+        {0, 0, 10},
+        {0, -1, 8},
+        {1, 0, 10},
+        ObjectMaterial(
+            {255, 0, 0, 255},
+            500,
+            0.2
+        )
+    );
 
-        if ((t > t_min && t < t_max)&&(t<closest_t)) {
-            closest_t = t;
-            closest_object = object;
-        }
-    }
+    closest_t = intersectRayTriangle(O, D, closest_object, 1E9);
 
     return std::make_pair(closest_object, closest_t);
 }
@@ -91,17 +82,9 @@ Vector3 ReflectRay(Vector3 R, Vector3 N) {
     return subtract(multiply(N, 2 * dot(N, R)), R);
 }
 
-Vector3 estimateNormal(SDFObject *object, Vector3 P) {
-    return normalize((Vector3){
-        object->SDF((Vector3){P.x + EPSILON, P.y, P.z}) - object->SDF((Vector3){P.x - EPSILON, P.y, P.z}),
-        object->SDF((Vector3){P.x, P.y + EPSILON, P.z}) - object->SDF((Vector3){P.x, P.y - EPSILON, P.z}),
-        object->SDF((Vector3){P.x, P.y, P.z  + EPSILON}) - object->SDF((Vector3){P.x, P.y, P.z - EPSILON})
-    });
-}
-
 Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, int recursion_depth) {   
-    std::pair<SDFObject*, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
-    SDFObject *closest_object = closest_intersection.first;
+    std::pair<MeshObject*, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
+    MeshObject *closest_object = closest_intersection.first;
     double closest_t = closest_intersection.second;
 
     if (closest_t==1E9) {
@@ -109,7 +92,7 @@ Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, in
     }
 
     Vector3 P = add(O, multiply(D, closest_t));
-    Vector3 N = estimateNormal(closest_object, P);
+    Vector3 N = closest_object -> normal;
     Color local_color = multiply(closest_object->material.color, ComputeLighting(P, N, multiply(D, -1), closest_object->material.specular, scene));
 
     double r = closest_object->material.reflective;
@@ -147,7 +130,6 @@ int main(void) {
         BeginDrawing();
 
         ClearBackground(BLACK);
-        DrawText("raytracing!", 10, 10, 20, DARKGRAY);
 
         for (int x = -canvas.width/2; x < canvas.width/2; x++) {
             if (x % 5 == 0) {

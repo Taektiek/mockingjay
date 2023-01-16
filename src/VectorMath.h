@@ -18,6 +18,7 @@ Vector3 abs(Vector3 v);
 Vector3 max(Vector3 v, double n);
 Vector2 max(Vector2 v, double n);
 Vector3 mod(Vector3 v, double n);
+Vector3 cross(Vector3 v1, Vector3 v2);
 
 void printVector(Vector3 v);
 void printColor(Color c);

@@ -53,6 +53,14 @@ Vector3 mod(Vector3 v, double n) {
     return (Vector3){std::fmod(v.x, n), std::fmod(v.y, n), std::fmod(v.z, n)};
 }
 
+Vector3 cross(Vector3 v1, Vector3 v2) {
+    return (Vector3){
+        v1.y*v2.z-v2.y*v1.z,
+        v1.z*v2.x-v2.z*v1.x,
+        v1.x*v2.y-v2.x*v1.y
+    };
+}
+
 void printVector(Vector3 v) {
     std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 }
