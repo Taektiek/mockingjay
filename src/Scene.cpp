@@ -4,7 +4,7 @@ Scene::Scene(Viewport viewport) {
     vp = viewport;
 }
 
-void Scene::AddObject(SDFObject *object) {
+void Scene::AddObject(MeshObject *object) {
     objects.push_back(object);
 }
 
