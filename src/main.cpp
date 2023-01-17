@@ -34,6 +34,10 @@ Vector2 projectToAxis(Vector3 P) {
     return (Vector2){P.x, P.y};
 }
 
+bool isBackface(Vector3 corner, Vector3 O, Vector3 N) {
+    return dot(subtract(corner, O), N) >= 0;
+}
+
 std::pair<MeshObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
     MeshObject *closest_object;
@@ -51,7 +55,7 @@ std::pair<MeshObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double 
         Vector2 Bp = projectToAxis(object -> p2);
         Vector2 Cp = projectToAxis(object -> p3);
 
-        if (!pointInTriangle(Pp, Ap, Bp, Cp)) {
+        if (!pointInTriangle(Pp, Ap, Bp, Cp) | isBackface(object -> p1, O, object -> normal)) {
             t = 1E9;
         }
 
@@ -136,7 +140,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(500, 500);
+    Canvas canvas(1000, 1000);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
@@ -161,7 +165,7 @@ int main(void) {
     scene.AddObject(new MeshObject(
         {2, 0, 10},
         {0, 2, 10},
-        {2, 2, 10},
+        {2, 2, 11},
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
