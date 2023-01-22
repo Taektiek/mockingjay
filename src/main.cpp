@@ -4,16 +4,23 @@
 #include "MeshObject.h"
 #include "VectorMath.h"
 #include "ObjectMaterial.h"
+#include "MeshPrimitives.h"
 
+#include <tuple>
 #include <math.h>
 #include <iostream>
 #include <utility>
 
 #define EPSILON 0.01
 
-double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh) {
-    Vector3 n = mesh -> normal;
-    double d = n.x * mesh -> p1.x + n.y * mesh -> p1.y + n.z * mesh -> p1.z;
+double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, int faceIndex) {
+    Vector3 n = mesh -> FaceNormal(faceIndex);
+
+    Vector3 p1 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[0]].pos;
+    Vector3 p2 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[1]].pos;
+    Vector3 p3 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[2]].pos;
+
+    double d = n.x * p1.x + n.y * p1.y + n.z * p1.z;
     return (d-n.x*O.x-n.y*O.y-n.z*O.z)/(n.x*D.x+n.y*D.y+n.z*D.z);
 }
 
@@ -38,34 +45,43 @@ bool isBackface(Vector3 corner, Vector3 O, Vector3 N) {
     return dot(subtract(corner, O), N) >= 0;
 }
 
-std::pair<MeshObject*, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
+std::tuple<MeshObject*, int, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
     double closest_t = 1E9;
     MeshObject *closest_object;
+    int faceIndex;
 
     for (MeshObject *object: scene.objects) {
-        double t = intersectRayTriangle(O, D, object);
+        int i = 0;
+        for (Face face: object -> faces) {
+            double t = intersectRayTriangle(O, D, object, i);
 
-        Vector3 P = add(O, multiply(D, t));
+            Vector3 P = add(O, multiply(D, t));
 
-        // Project
+            Vector3 p1 = object -> vertices[face.cornerIndices[0]].pos;
+            Vector3 p2 = object -> vertices[face.cornerIndices[1]].pos;
+            Vector3 p3 = object -> vertices[face.cornerIndices[2]].pos;
+            // Project
 
-        Vector2 Pp = projectToAxis(P);
+            Vector2 Pp = projectToAxis(P);
 
-        Vector2 Ap = projectToAxis(object -> p1);
-        Vector2 Bp = projectToAxis(object -> p2);
-        Vector2 Cp = projectToAxis(object -> p3);
+            Vector2 Ap = projectToAxis(p1);
+            Vector2 Bp = projectToAxis(p2);
+            Vector2 Cp = projectToAxis(p3);
 
-        if (!pointInTriangle(Pp, Ap, Bp, Cp) | isBackface(object -> p1, O, object -> normal)) {
-            t = 1E9;
-        }
+            if (!pointInTriangle(Pp, Ap, Bp, Cp) | isBackface(p1, O, object -> FaceNormal(i))) {
+                t = 1E9;
+            }
 
-        if ((t > t_min && t < t_max) && (t < closest_t)) {
-            closest_t = t;
-            closest_object = object;
+            if ((t > t_min && t < t_max) && (t < closest_t)) {
+                closest_t = t;
+                closest_object = object;
+                faceIndex = i;
+            }
+            i++;
         }
     }
 
-    return std::make_pair(closest_object, closest_t);
+    return std::make_tuple(closest_object, faceIndex, closest_t);
 }
 
 double ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
@@ -83,7 +99,8 @@ double ComputeLighting(Vector3 P, Vector3 N, Vector3 V, double s, Scene scene) {
             }
 
             // Shadow Check
-            double shadow_t = ClosestIntersection(P, multiply(normalize(L), 0.1), 0.001, 1E9, scene).second;
+            auto intersection = ClosestIntersection(P, multiply(normalize(L), 0.1), 0.001, 1E9, scene);
+            double shadow_t = std::get<2>(intersection);
             if (shadow_t != 1E9) {
                 continue;
             } 
@@ -112,16 +129,17 @@ Vector3 ReflectRay(Vector3 R, Vector3 N) {
 }
 
 Color TraceRay(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene, int recursion_depth) {   
-    std::pair<MeshObject*, double> closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
-    MeshObject *closest_object = closest_intersection.first;
-    double closest_t = closest_intersection.second;
+    auto closest_intersection = ClosestIntersection(O, D, t_min, t_max, scene);
+    MeshObject *closest_object = std::get<0>(closest_intersection);
+    int faceIndex = std::get<1>(closest_intersection);
+    double closest_t = std::get<2>(closest_intersection);
 
     if (closest_t==1E9) {
         return RAYWHITE;
     }
 
     Vector3 P = add(O, multiply(D, closest_t));
-    Vector3 N = closest_object -> normal;
+    Vector3 N = closest_object -> FaceNormal(faceIndex);
     Color local_color = multiply(closest_object->material.color, ComputeLighting(P, N, multiply(D, -1), closest_object->material.specular, scene));
 
     double r = closest_object->material.reflective;
@@ -151,27 +169,17 @@ int main(void) {
 
     std::cout << "Initialize scene" << std::endl;
 
-    scene.AddObject(new MeshObject(
-        {0, 0, 10},
-        {0, 2, 10},
-        {2, 0, 10},
+    MeshObject* Obj = new MeshObject(
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
             0.2
         )
-    ));
+    );
 
-    scene.AddObject(new MeshObject(
-        {2, 0, 10},
-        {0, 2, 10},
-        {2, 2, 11},
-        ObjectMaterial(
-            {255, 0, 0, 255},
-            500,
-            0.2
-        )
-    ));
+    generateBox(Obj, {-2, 0, 10}, {1, 2, 3});
+
+    scene.AddObject(Obj);
 
     scene.AddLight(Light(
         0, // Ambient

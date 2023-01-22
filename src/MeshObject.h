@@ -1,21 +1,26 @@
 #ifndef MESHOBJECT_H
 #define MESHOBJECT_H
 
+#include <vector>
+
 #include "raylib.h"
 #include "ObjectMaterial.h"
 #include "VectorMath.h"
+#include "MeshTools.h"
 
 class MeshObject {
     public:
         ObjectMaterial material;
 
-        Vector3 p1;
-        Vector3 p2;
-        Vector3 p3;
+        std::vector<Face> faces;
+        std::vector<Vertex> vertices;
 
-        Vector3 normal;
+        int AddVertex(Vector3 P);
+        int AddFace(int v1, int v2, int v3);
 
-        MeshObject(Vector3 p1, Vector3 p2, Vector3 p3, ObjectMaterial material);
+        Vector3 FaceNormal(int f);
+
+        MeshObject(ObjectMaterial material);
         MeshObject();
 };
 
