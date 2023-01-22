@@ -158,10 +158,10 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(1000, 1000);
+    Canvas canvas(2000, 2000);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
-    SetTargetFPS(60);
+    // SetTargetFPS(60);
 
     Viewport vp(1, 1, 1);
 
@@ -199,22 +199,26 @@ int main(void) {
     ));
 
     std::cout << "Initialized scene" << std::endl;
+
+    int x = -canvas.width/2;
     
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-        ClearBackground(BLACK);
-
-        for (int x = -canvas.width/2; x < canvas.width/2; x++) {
-            if (x % 5 == 0) {
-                std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
-            }
-            for (int y = -canvas.height/2; y < canvas.height/2; y++) {
-                Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
-                Color color = TraceRay(O, D, 1, 1E9, scene, 5);
-                canvas.PutPixel(x, y, color);
-            }
+        if (x % 5 == 0) {
+            std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
         }
+        for (int y = -canvas.height/2; y < canvas.height/2; y++) {
+            Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
+            Color color = TraceRay(O, D, 1, 1E9, scene, 5);
+            canvas.PutPixel(x, y, color);
+        }
+
+        if (x >= canvas.width/2) {
+            x = -canvas.width/2;
+        }
+
+        x++;
 
         EndDrawing();
     }
