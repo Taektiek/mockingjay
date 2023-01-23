@@ -161,7 +161,7 @@ int main(void) {
 
     Scene scene(vp);
 
-    MeshObject* sphere1 = new MeshObject(
+    MeshObject* cylinder = new MeshObject(
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
@@ -169,33 +169,10 @@ int main(void) {
         )
     );
 
-    generateSphere(sphere1, {-1, 1, 10}, 2.5, 7, 7);
+    generateCylinder(cylinder, {-1, 2, 10}, 2, 1, 20);
+    generateCylinder(cylinder, {1, -2, 10}, 2, 1, 20);
 
-    scene.AddObject(sphere1);
-
-    MeshObject* sphere2 = new MeshObject(
-        ObjectMaterial(
-            {0, 0, 255, 255},
-            500,
-            0.2
-        )
-    );
-
-    generateSphere(sphere2, {1, -1, 8}, 1, 10, 10);
-
-    scene.AddObject(sphere2);
-
-    MeshObject* sphere3 = new MeshObject(
-        ObjectMaterial(
-            {0, 255, 0, 255},
-            500,
-            0.2
-        )
-    );
-
-    generateSphere(sphere3, {-1, -2.5, 9}, 0.7, 10, 10);
-
-    scene.AddObject(sphere3);
+    scene.AddObject(cylinder);
 
     scene.AddLight(Light(
         0, // Ambient

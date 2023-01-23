@@ -10,4 +10,5 @@
 void generateBox(MeshObject* mesh, Vector3 center, Vector3 box);
 void generateSphere(MeshObject* mesh, Vector3 center, double radius, int rings, int detail);
 
+void generateCylinder(MeshObject* mesh, Vector3 center, double height, double radius, int detail);
 #endif

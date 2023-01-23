@@ -42,13 +42,35 @@ void generateSphere(MeshObject* mesh, Vector3 center, double radius, int rings, 
         for (int i = 0; i < detail; i++) {
             currentVertex = mesh -> AddVertex({center.x+currentRadius*sin(2*M_PI*i/detail), ringHeight, center.z+currentRadius*cos(2*M_PI*i/detail)});
             if (ring == 1) {
-                mesh -> AddFace(0, currentVertex - 1, currentVertex);
+                mesh -> AddFace(pTop, currentVertex - 1, currentVertex);
             } else if (i != 0) {
                 mesh -> AddFace(currentVertex - detail, currentVertex - 1, currentVertex);
                 mesh -> AddFace(currentVertex - detail, currentVertex - detail - 1, currentVertex - 1);
                 if (ring == detail) {
-                    mesh -> AddFace(1, currentVertex - 1, currentVertex);
+                    mesh -> AddFace(pBottom, currentVertex - 1, currentVertex);
                 }
+            }
+        }
+    }
+}
+
+void generateCylinder(MeshObject* mesh, Vector3 center, double height, double radius, int detail) {
+    int lastVertex = mesh -> vertices.size()-1;
+    int currentVertex;
+
+    for (int i = 0; i < detail; i++) { // TOP RING
+        currentVertex = mesh -> AddVertex({center.x+radius*sin(2*M_PI*i/detail), center.y+0.5*height, center.z+radius*cos(2*M_PI*i/detail)});
+        if (i > 1) {
+            mesh -> AddFace(lastVertex+1, currentVertex - 1, currentVertex);
+        }
+    } 
+    for (int i = 0; i < detail; i++) { // BOTTOM RING
+        currentVertex = mesh -> AddVertex({center.x+radius*sin(2*M_PI*i/detail), center.y-0.5*height, center.z+radius*cos(2*M_PI*i/detail)});
+        if (i != 0) {
+            mesh -> AddFace(currentVertex, currentVertex - detail - 1, currentVertex - 1);
+            mesh -> AddFace(currentVertex, currentVertex - detail, currentVertex - detail - 1);
+            if (i != 1) {
+                mesh -> AddFace(lastVertex+1+detail, currentVertex, currentVertex - 1);
             }
         }
     }
