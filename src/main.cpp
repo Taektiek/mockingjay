@@ -10,6 +10,7 @@
 #include <math.h>
 #include <iostream>
 #include <utility>
+#include <chrono>
 
 #define EPSILON 0.01
 
@@ -24,7 +25,7 @@ double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, int faceInde
     return (d-n.x*O.x-n.y*O.y-n.z*O.z)/(n.x*D.x+n.y*D.y+n.z*D.z);
 }
 
-double triangleArea(Vector2 p1, Vector2 p2, Vector2 p3) {
+double triangleArea(Vector3 p1, Vector3 p2, Vector3 p3) {
     double a = magnitude(subtract(p1, p2));
     double b = magnitude(subtract(p2, p3));
     double c = magnitude(subtract(p3, p1));
@@ -33,7 +34,7 @@ double triangleArea(Vector2 p1, Vector2 p2, Vector2 p3) {
     return sqrt(s*(s-a)*(s-b)*(s-c));
 }
 
-bool pointInTriangle(Vector2 P, Vector2 A, Vector2 B, Vector2 C) {
+bool pointInTriangle(Vector3 P, Vector3 A, Vector3 B, Vector3 C) {
     return triangleArea(A, B, C) + EPSILON >= triangleArea(P, A, B) + triangleArea(P, A, C) + triangleArea(P, B, C);
 }
 
@@ -57,18 +58,11 @@ std::tuple<MeshObject*, int, double> ClosestIntersection(Vector3 O, Vector3 D, d
 
             Vector3 P = add(O, multiply(D, t));
 
-            Vector3 p1 = object -> vertices[face.cornerIndices[0]].pos;
-            Vector3 p2 = object -> vertices[face.cornerIndices[1]].pos;
-            Vector3 p3 = object -> vertices[face.cornerIndices[2]].pos;
-            // Project
+            Vector3 v1 = object -> vertices[face.cornerIndices[0]].pos;
+            Vector3 v2 = object -> vertices[face.cornerIndices[1]].pos;
+            Vector3 v3 = object -> vertices[face.cornerIndices[2]].pos;
 
-            Vector2 Pp = projectToAxis(P);
-
-            Vector2 Ap = projectToAxis(p1);
-            Vector2 Bp = projectToAxis(p2);
-            Vector2 Cp = projectToAxis(p3);
-
-            if (!pointInTriangle(Pp, Ap, Bp, Cp) | isBackface(p1, O, object -> FaceNormal(i))) {
+            if (!pointInTriangle(P, v1, v2, v3) | isBackface(v1, O, object -> FaceNormal(i))) {
                 t = 1E9;
             }
 
@@ -158,7 +152,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(2000, 2000);
+    Canvas canvas(500, 500);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     // SetTargetFPS(60);
@@ -167,9 +161,7 @@ int main(void) {
 
     Scene scene(vp);
 
-    std::cout << "Initialize scene" << std::endl;
-
-    MeshObject* Obj = new MeshObject(
+    MeshObject* box1 = new MeshObject(
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
@@ -177,9 +169,21 @@ int main(void) {
         )
     );
 
-    generateBox(Obj, {-2, 0, 10}, {1, 2, 3});
+    generateBox(box1, {1, 0, 10}, {1, 2, 3});
 
-    scene.AddObject(Obj);
+    scene.AddObject(box1);
+
+    MeshObject* box2 = new MeshObject(
+        ObjectMaterial(
+            {0, 255, 0, 255},
+            500,
+            0.2
+        )
+    );
+
+    generateBox(box2, {-1, 2, 8}, {0.5, 2, 3});
+
+    scene.AddObject(box2);
 
     scene.AddLight(Light(
         0, // Ambient
@@ -198,16 +202,15 @@ int main(void) {
         (Vector3){1, 4, 4}
     ));
 
-    std::cout << "Initialized scene" << std::endl;
-
+    auto start = std::chrono::high_resolution_clock::now();
     int x = -canvas.width/2;
     
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-        if (x % 5 == 0) {
-            std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
-        }
+        // if (x % 20 == 0) {
+        //     std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
+        // }
         for (int y = -canvas.height/2; y < canvas.height/2; y++) {
             Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
             Color color = TraceRay(O, D, 1, 1E9, scene, 5);
@@ -215,7 +218,11 @@ int main(void) {
         }
 
         if (x >= canvas.width/2) {
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            std::cout << duration.count() << " milliseconds" << std::endl;
             x = -canvas.width/2;
+            start = std::chrono::high_resolution_clock::now();
         }
 
         x++;
