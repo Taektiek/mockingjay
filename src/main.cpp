@@ -12,7 +12,7 @@
 #include <utility>
 #include <chrono>
 
-#define EPSILON 0.01
+#define EPSILON 0.001
 
 double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, int faceIndex) {
     Vector3 n = mesh -> FaceNormal(faceIndex);
@@ -184,6 +184,31 @@ int main(void) {
     generateBox(box2, {-1, 2, 8}, {0.5, 2, 3});
 
     scene.AddObject(box2);
+
+    MeshObject* box3 = new MeshObject(
+        ObjectMaterial(
+            {255, 255, 0, 255},
+            500,
+            0.2
+        )
+    );
+
+    generateBox(box3, {0, -2, 8}, {5, .3, 5});
+
+    scene.AddObject(box3);
+
+    MeshObject* box4 = new MeshObject(
+        ObjectMaterial(
+            {0, 0, 255, 255},
+            500,
+            0.2
+        )
+    );
+
+    generateBox(box4, {-1, -1, 9}, {1, 1, 1});
+
+    scene.AddObject(box4);
+
 
     scene.AddLight(Light(
         0, // Ambient
