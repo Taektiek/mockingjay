@@ -2,9 +2,9 @@
 
 void initScene(Scene *scene) {
 
-    scene -> AddObject(new SDFBox(
-        {1, 0, 10}, //center
-        {1, 2, 3}, // box
+    scene -> AddObject(new SDFSphere(
+        {-1, 1, 10}, //center
+        2.5, // radius
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
@@ -12,31 +12,21 @@ void initScene(Scene *scene) {
         )
     ));
 
-    scene -> AddObject(new SDFBox(
-        {-1, 2, 8}, //center
-        {0.5, 2, 3}, // box
-        ObjectMaterial(
-            {0, 255, 0, 255},
-            500,
-            0.2
-        )
-    ));
-
-    scene -> AddObject(new SDFBox(
-        {0, -2, 8}, //center
-        {5, .3, 5}, // box
-        ObjectMaterial(
-            {255, 255, 0, 255},
-            500,
-            0.2
-        )
-    ));
-
-    scene -> AddObject(new SDFBox(
-        {-1, -1, 9}, //center
-        {1, 1, 1}, // box
+    scene -> AddObject(new SDFSphere(
+        {1, -1, 8}, //center
+        1, // radius
         ObjectMaterial(
             {0, 0, 255, 255},
+            500,
+            0.2
+        )
+    ));
+
+    scene -> AddObject(new SDFSphere(
+        {-1, -2.5, 9}, //center
+        0.7, // radius
+        ObjectMaterial(
+            {0, 255, 0, 255},
             500,
             0.2
         )
