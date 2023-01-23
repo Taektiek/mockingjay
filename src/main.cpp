@@ -9,6 +9,7 @@
 #include <math.h>
 #include <iostream>
 #include <utility>
+#include <chrono>
 
 double EPSILON = 0.00001;
 
@@ -128,7 +129,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(1000, 1000);
+    Canvas canvas(500, 500);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
@@ -143,14 +144,15 @@ int main(void) {
 
     std::cout << "Initialized scene" << std::endl;
     
+    auto start = std::chrono::high_resolution_clock::now();
     int x = -canvas.width/2;
     
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-        if (x % 5 == 0) {
-            std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
-        }
+        // if (x % 20 == 0) {
+        //     std::cout << 100+(double)(x-canvas.width/2)/canvas.width * 100 << "% done" << std::endl;
+        // }
         for (int y = -canvas.height/2; y < canvas.height/2; y++) {
             Vector3 D = normalize(vp.CanvasToViewport(canvas, x, y));
             Color color = TraceRay(O, D, 1, 1E9, scene, 5);
@@ -158,7 +160,11 @@ int main(void) {
         }
 
         if (x >= canvas.width/2) {
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            std::cout << duration.count() << " milliseconds" << std::endl;
             x = -canvas.width/2;
+            start = std::chrono::high_resolution_clock::now();
         }
 
         x++;
