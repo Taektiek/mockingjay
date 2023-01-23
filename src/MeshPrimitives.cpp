@@ -27,3 +27,29 @@ void generateBox(MeshObject* mesh, Vector3 center, Vector3 box) {
     mesh -> AddFace(p000, p011, p010); // LEFT
     mesh -> AddFace(p000, p001, p011); // LEFT
 }
+
+void generateSphere(MeshObject* mesh, Vector3 center, double radius, int rings, int detail) {
+    int pTop = mesh -> AddVertex(add(center, {0, radius, 0}));
+    int pBottom = mesh -> AddVertex(subtract(center, {0, radius, 0}));
+
+    int currentVertex;
+
+
+    for (int ring = 1; ring <= detail; ring ++) {
+        double ringHeight = center.y + radius - ring*radius*2/rings;
+        double currentRadius = sqrt(1-pow((1-(double)ring/rings)*2-1, 2))*radius;
+        std::cout << currentRadius << std::endl;
+        for (int i = 0; i < detail; i++) {
+            currentVertex = mesh -> AddVertex({center.x+currentRadius*sin(2*M_PI*i/detail), ringHeight, center.z+currentRadius*cos(2*M_PI*i/detail)});
+            if (ring == 1) {
+                mesh -> AddFace(0, currentVertex - 1, currentVertex);
+            } else if (i != 0) {
+                mesh -> AddFace(currentVertex - detail, currentVertex - 1, currentVertex);
+                mesh -> AddFace(currentVertex - detail, currentVertex - detail - 1, currentVertex - 1);
+                if (ring == detail) {
+                    mesh -> AddFace(1, currentVertex - 1, currentVertex);
+                }
+            }
+        }
+    }
+}

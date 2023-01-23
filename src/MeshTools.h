@@ -12,6 +12,7 @@ struct Vertex {
 
 struct Face {
     int cornerIndices[3];
+    Vector3 normal;
 };
 
 #endif

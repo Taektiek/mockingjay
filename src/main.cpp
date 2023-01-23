@@ -161,7 +161,7 @@ int main(void) {
 
     Scene scene(vp);
 
-    MeshObject* box1 = new MeshObject(
+    MeshObject* sphere1 = new MeshObject(
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
@@ -169,35 +169,11 @@ int main(void) {
         )
     );
 
-    generateBox(box1, {1, 0, 10}, {1, 2, 3});
+    generateSphere(sphere1, {-1, 1, 10}, 2.5, 7, 7);
 
-    scene.AddObject(box1);
+    scene.AddObject(sphere1);
 
-    MeshObject* box2 = new MeshObject(
-        ObjectMaterial(
-            {0, 255, 0, 255},
-            500,
-            0.2
-        )
-    );
-
-    generateBox(box2, {-1, 2, 8}, {0.5, 2, 3});
-
-    scene.AddObject(box2);
-
-    MeshObject* box3 = new MeshObject(
-        ObjectMaterial(
-            {255, 255, 0, 255},
-            500,
-            0.2
-        )
-    );
-
-    generateBox(box3, {0, -2, 8}, {5, .3, 5});
-
-    scene.AddObject(box3);
-
-    MeshObject* box4 = new MeshObject(
+    MeshObject* sphere2 = new MeshObject(
         ObjectMaterial(
             {0, 0, 255, 255},
             500,
@@ -205,10 +181,21 @@ int main(void) {
         )
     );
 
-    generateBox(box4, {-1, -1, 9}, {1, 1, 1});
+    generateSphere(sphere2, {1, -1, 8}, 1, 10, 10);
 
-    scene.AddObject(box4);
+    scene.AddObject(sphere2);
 
+    MeshObject* sphere3 = new MeshObject(
+        ObjectMaterial(
+            {0, 255, 0, 255},
+            500,
+            0.2
+        )
+    );
+
+    generateSphere(sphere3, {-1, -2.5, 9}, 0.7, 10, 10);
+
+    scene.AddObject(sphere3);
 
     scene.AddLight(Light(
         0, // Ambient
