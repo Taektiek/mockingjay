@@ -22,6 +22,26 @@ void initScene(Scene *scene) {
         )
     ));
 
+    scene -> AddObject(new SDFBox(
+        {0, -2, 8}, //center
+        {5, .3, 5}, // box
+        ObjectMaterial(
+            {255, 255, 0, 255},
+            500,
+            0.2
+        )
+    ));
+
+    scene -> AddObject(new SDFBox(
+        {-1, -1, 9}, //center
+        {1, 1, 1}, // box
+        ObjectMaterial(
+            {0, 0, 255, 255},
+            500,
+            0.2
+        )
+    ));
+
     scene -> AddLight(Light(
         0, // Ambient
         0.2

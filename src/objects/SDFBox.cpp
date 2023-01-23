@@ -15,7 +15,7 @@ SDFBox::SDFBox() {
 
 double SDFBox::SDF(Vector3 P) {
     P = subtract(P, center);
-    Vector3 b = box;
+    Vector3 b = multiply(box, 0.5);
     Vector3 q = subtract(abs(P), b);
     return magnitude(max(q,0.0)) + std::min((double)std::max(q.x,std::max(q.y,q.z)),0.0);
 }
