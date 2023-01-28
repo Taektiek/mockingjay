@@ -14,17 +14,6 @@
 
 #define EPSILON 0.001
 
-double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, int faceIndex) {
-    Vector3 n = mesh -> FaceNormal(faceIndex);
-
-    Vector3 p1 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[0]].pos;
-    Vector3 p2 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[1]].pos;
-    Vector3 p3 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[2]].pos;
-
-    double d = n.x * p1.x + n.y * p1.y + n.z * p1.z;
-    return (d-n.x*O.x-n.y*O.y-n.z*O.z)/(n.x*D.x+n.y*D.y+n.z*D.z);
-}
-
 double triangleArea(Vector3 p1, Vector3 p2, Vector3 p3) {
     double a = magnitude(subtract(p1, p2));
     double b = magnitude(subtract(p2, p3));
@@ -38,12 +27,26 @@ bool pointInTriangle(Vector3 P, Vector3 A, Vector3 B, Vector3 C) {
     return triangleArea(A, B, C) + EPSILON >= triangleArea(P, A, B) + triangleArea(P, A, C) + triangleArea(P, B, C);
 }
 
-Vector2 projectToAxis(Vector3 P) {
-    return (Vector2){P.x, P.y};
-}
-
 bool isBackface(Vector3 corner, Vector3 O, Vector3 N) {
     return dot(subtract(corner, O), N) >= 0;
+}
+
+double intersectRayTriangle(Vector3 O, Vector3 D, MeshObject* mesh, int faceIndex) {
+    Vector3 n = mesh -> FaceNormal(faceIndex);
+
+    Vector3 v1 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[0]].pos;
+    Vector3 v2 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[1]].pos;
+    Vector3 v3 = mesh -> vertices[mesh -> faces[faceIndex].cornerIndices[2]].pos;
+
+    double d = n.x * v1.x + n.y * v1.y + n.z * v1.z;
+    double t = (d-n.x*O.x-n.y*O.y-n.z*O.z)/(n.x*D.x+n.y*D.y+n.z*D.z);
+
+    Vector3 P = add(O, multiply(D, t));
+
+    if (!pointInTriangle(P, v1, v2, v3) | isBackface(v1, O, mesh -> FaceNormal(faceIndex))) {
+        return 1E9;
+    }
+    return t;
 }
 
 std::tuple<MeshObject*, int, double> ClosestIntersection(Vector3 O, Vector3 D, double t_min, double t_max, Scene scene) {
@@ -55,16 +58,6 @@ std::tuple<MeshObject*, int, double> ClosestIntersection(Vector3 O, Vector3 D, d
         int i = 0;
         for (Face face: object -> faces) {
             double t = intersectRayTriangle(O, D, object, i);
-
-            Vector3 P = add(O, multiply(D, t));
-
-            Vector3 v1 = object -> vertices[face.cornerIndices[0]].pos;
-            Vector3 v2 = object -> vertices[face.cornerIndices[1]].pos;
-            Vector3 v3 = object -> vertices[face.cornerIndices[2]].pos;
-
-            if (!pointInTriangle(P, v1, v2, v3) | isBackface(v1, O, object -> FaceNormal(i))) {
-                t = 1E9;
-            }
 
             if ((t > t_min && t < t_max) && (t < closest_t)) {
                 closest_t = t;
@@ -161,7 +154,7 @@ int main(void) {
 
     Scene scene(vp);
 
-    MeshObject* cylinder = new MeshObject(
+    MeshObject* obj = new MeshObject(
         ObjectMaterial(
             {255, 0, 0, 255},
             500,
@@ -169,10 +162,9 @@ int main(void) {
         )
     );
 
-    generateCylinder(cylinder, {-1, 2, 10}, 2, 1, 20);
-    generateCylinder(cylinder, {1, -2, 10}, 2, 1, 20);
+    generateBox(obj, {1, 1, 10}, {1, 1, 1});
 
-    scene.AddObject(cylinder);
+    scene.AddObject(obj);
 
     scene.AddLight(Light(
         0, // Ambient

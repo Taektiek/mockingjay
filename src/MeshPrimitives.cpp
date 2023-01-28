@@ -6,13 +6,13 @@ void generateBox(MeshObject* mesh, Vector3 center, Vector3 box) {
     Vector3 base = subtract(center, multiply(box, 0.5));
 
     int p000 = mesh -> AddVertex(base);
-    int p001 = mesh -> AddVertex(add(base, {EPSILON, EPSILON, box.z}));
+    int p001 = mesh -> AddVertex(add(base, {0, 0, box.z}));
     int p010 = mesh -> AddVertex(add(base, {0, box.y, 0}));
-    int p011 = mesh -> AddVertex(add(base, {EPSILON, box.y + EPSILON, box.z}));
+    int p011 = mesh -> AddVertex(add(base, {0, box.y, box.z}));
     int p100 = mesh -> AddVertex(add(base, {box.x, 0, 0}));
-    int p101 = mesh -> AddVertex(add(base, {box.x + EPSILON, EPSILON, box.z}));
+    int p101 = mesh -> AddVertex(add(base, {box.x, 0, box.z}));
     int p110 = mesh -> AddVertex(add(base, {box.x, box.y, 0}));
-    int p111 = mesh -> AddVertex(add(base, {box.x + EPSILON, box.y + EPSILON, box.z}));
+    int p111 = mesh -> AddVertex(add(base, box));
 
     mesh -> AddFace(p000, p010, p100); // FRONT
     mesh -> AddFace(p110, p100, p010); // FRONT
@@ -34,13 +34,16 @@ void generateSphere(MeshObject* mesh, Vector3 center, double radius, int rings, 
 
     int currentVertex;
 
-
     for (int ring = 1; ring <= detail; ring ++) {
         double ringHeight = center.y + radius - ring*radius*2/rings;
         double currentRadius = sqrt(1-pow((1-(double)ring/rings)*2-1, 2))*radius;
         std::cout << currentRadius << std::endl;
         for (int i = 0; i < detail; i++) {
-            currentVertex = mesh -> AddVertex({center.x+currentRadius*sin(2*M_PI*i/detail), ringHeight, center.z+currentRadius*cos(2*M_PI*i/detail)});
+            currentVertex = mesh -> AddVertex({
+                center.x+currentRadius*sin(2*M_PI*i/detail),
+                ringHeight,
+                center.z+currentRadius*cos(2*M_PI*i/detail)
+            });
             if (ring == 1) {
                 mesh -> AddFace(pTop, currentVertex - 1, currentVertex);
             } else if (i != 0) {
@@ -59,13 +62,21 @@ void generateCylinder(MeshObject* mesh, Vector3 center, double height, double ra
     int currentVertex;
 
     for (int i = 0; i < detail; i++) { // TOP RING
-        currentVertex = mesh -> AddVertex({center.x+radius*sin(2*M_PI*i/detail), center.y+0.5*height, center.z+radius*cos(2*M_PI*i/detail)});
+        currentVertex = mesh -> AddVertex({
+            center.x+radius*sin(2*M_PI*i/detail), 
+            center.y+0.5*height, 
+            center.z+radius*cos(2*M_PI*i/detail)
+        });
         if (i > 1) {
             mesh -> AddFace(lastVertex+1, currentVertex - 1, currentVertex);
         }
     } 
     for (int i = 0; i < detail; i++) { // BOTTOM RING
-        currentVertex = mesh -> AddVertex({center.x+radius*sin(2*M_PI*i/detail), center.y-0.5*height, center.z+radius*cos(2*M_PI*i/detail)});
+        currentVertex = mesh -> AddVertex({
+            center.x+radius*sin(2*M_PI*i/detail), 
+            center.y-0.5*height, 
+            center.z+radius*cos(2*M_PI*i/detail)
+        });
         if (i != 0) {
             mesh -> AddFace(currentVertex, currentVertex - detail - 1, currentVertex - 1);
             mesh -> AddFace(currentVertex, currentVertex - detail, currentVertex - detail - 1);
