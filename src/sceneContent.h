@@ -14,6 +14,9 @@
 
 #include "objects/SDFRotate.h"
 
+#include <math.h>
+#include <vector>
+
 void initScene(Scene *scene);
 
 #endif

@@ -129,7 +129,7 @@ int main(void) {
 
     Vector3 O = (Vector3){0, 0, 0};
 
-    Canvas canvas(500, 500);
+    Canvas canvas(1000, 1000);
 
     InitWindow(canvas.width, canvas.height, "raytracing");
     SetTargetFPS(60);
